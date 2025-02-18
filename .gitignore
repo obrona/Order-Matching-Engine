@@ -4,3 +4,6 @@ client
 /.deps
 compile_commands.json
 .cache
+test*
+.vscode/
+a.out

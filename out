@@ -1,0 +1,14 @@
+T1 enter buy. WaveNum: 0
+T3 enter buy. WaveNum: 0
+T3 leave buy. WaveNum: 0
+T3 enter buy. WaveNum: 0
+T1 leave buy. WaveNum: 0
+T1 enter buy. WaveNum: 0
+T1 leave buy. WaveNum: 0
+T3 leave buy. WaveNum: 0
+T4 enter cancel. WaveNum: 1
+T4 leave cancel. WaveNum: 1
+T2 enter sell. WaveNum: 2
+T2 leave sell. WaveNum: 2
+T2 enter sell. WaveNum: 3
+T2 leave sell. WaveNum: 3
