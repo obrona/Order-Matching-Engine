@@ -75,11 +75,11 @@ struct SingleLaneBridge {
         }
     }
 
-    void leaveSell(function<void()> f) {
+    void leaveSell(int c, function<void()> f) {
         unique_lock<mutex> lock(*mutPtr);
         sellCnt --;
         if (sellCnt == 0) {
-            waveNum++;
+            waveNum += c;
             f();
             (*condPtr).notify_all();
         }
