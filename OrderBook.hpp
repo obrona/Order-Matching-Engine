@@ -14,6 +14,8 @@ using namespace std;
 struct Key {
     uint32_t price, time;
 
+
+    // these here do not work !!!
     bool operator<(const Key& other) {
         if (price != other.price) return price < other.price;
         else return time < other.time;
@@ -26,13 +28,34 @@ struct Key {
 
 };
 
+struct CompareLessKey {
+    // remember the const after the function declaration i.e f(args) const {}
+    bool operator()(const Key& k1, const Key& k2) const {
+        if (k1.price != k2.price) return k1.price < k2.price;
+        else return k1.time < k2.time;
+    }
+};
+
+struct CompareGreaterKey {
+    bool operator()(const Key& k1, const Key& k2) const {
+        if (k1.price != k2.price) return k1.price > k2.price;
+        else return k1.time < k2.time;
+    }
+};
+
 struct AtomicNode {
-    uint32_t rid;
-    atomic<uint32_t> count, eid = 1;
+    uint32_t rid = 0;
+    atomic<uint32_t> count = 0, eid = 1;
 
     AtomicNode(uint32_t rid, uint32_t cnt): count(cnt) {}
 
     AtomicNode(const AtomicNode& other): rid(other.rid), count(other.count.load()), eid(other.eid.load()) {}
+
+    void operator=(const AtomicNode& other) {
+        rid = other.rid;
+        count = other.count.load();
+        eid = other.count.load();
+    }
 };
 
 
@@ -43,12 +66,14 @@ struct OrderBook {
     SingleLaneBridge slb;
 
     shared_ptr<mutex> buyMutPtr;
-    atomic<uint32_t> buyTimeStamper;
-    map<Key, AtomicNode, greater<Key>> buyBook;
+    atomic<uint32_t> buyTimeStamper = 0;
+    map<Key, AtomicNode, CompareGreaterKey> buyBook;
 
     shared_ptr<mutex> sellMutPtr;
-    atomic<uint32_t> sellTimeStamper;
-    map<Key, AtomicNode, less<Key>> sellBook;
+    atomic<uint32_t> sellTimeStamper = 0;
+    map<Key, AtomicNode, CompareLessKey> sellBook;
+
+    OrderBook() {}
 
 
     OrderBook(const OrderBook& other): 
@@ -62,7 +87,7 @@ struct OrderBook {
     {}
 
     void removeFinishedBuys() {
-        lock_guard<mutex>(*buyMutPtr);
+        lock_guard<mutex> lock(*buyMutPtr);
         for (auto it = buyBook.begin(); it != buyBook.end();) {
             if (it->second.count.load() == 0) {
                 it = buyBook.erase(it);
@@ -73,7 +98,7 @@ struct OrderBook {
     }
 
     void removeFinishedSells() {
-        lock_guard<mutex>(*sellMutPtr);
+        lock_guard<mutex> lock(*sellMutPtr);
         for (auto it = sellBook.begin(); it != sellBook.end();) {
             if (it->second.count.load() == 0) {
                 it = sellBook.erase(it);
@@ -207,7 +232,7 @@ struct OrderBook {
 
         slb.leaveCancel(); 
     }
-
+    
 
 
 };
