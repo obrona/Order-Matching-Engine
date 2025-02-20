@@ -31,31 +31,23 @@ void Engine::connection_thread(ClientConnection connection)
 		// Functions for printing output actions in the prescribed format are
 		// provided in the Output class:
 		if (input.type == 'C') {
-			bool flag;
-			unique_lock<mutex> ulock(mut1);
-			flag = orderIdToTid.contains(input.order_id) && orderIdToTid[input.order_id] == this_thread::get_id();
-			ulock.unlock();
-
+			bool flag = orderIdToTid.contains(input.order_id) && orderIdToTid.getValue(input.order_id) == this_thread::get_id();
+			
 			if (!flag) {
 				Output::OrderDeleted(input.order_id, false, 0);
 			} else {
-				unique_lock<mutex> ulock(mut2);
-				OrderBook& ob = orderBooks[string(input.instrument)];
-				ulock.unlock();
-
+				std::string instr = orderIdToInstrument.getValue(input.order_id);
+				OrderBook& ob = orderBooks.getValue(instr);
 				ob.cancelOrder(input);
 			}
 		} else {
-			unique_lock<mutex> ulock1(mut1);
-			orderIdToTid[input.order_id] = this_thread::get_id();
-			ulock1.unlock();
-
-			unique_lock<mutex> ulock2(mut2);
-			OrderBook& ob = orderBooks[string(input.instrument)];
-			ulock2.unlock();
-
+			
+			orderIdToTid.insert(input.order_id, this_thread::get_id());
+			orderIdToInstrument.insert(input.order_id, std::string(input.instrument));
+			
+			OrderBook& ob = orderBooks.getValue(std::string(input.instrument));
+			
 			if (input.type == 'B') {
-				cout << "buy received" << endl;
 				ob.matchBuy(input);
 			} else {
 				ob.matchSell(input);

@@ -19,6 +19,9 @@ client: $(BUILDDIR)/client.cpp.o
 debug_engine: 
 	clang++ -std=c++20 main.cpp engine.cpp io.cpp -g -o debug_engine
 
+engine2:
+	clang++ -std=c++20 main.cpp engine.cpp io.cpp -o engine
+
 .PHONY: clean
 clean:
 	rm -rf $(BUILDDIR)

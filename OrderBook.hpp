@@ -184,6 +184,8 @@ struct OrderBook {
         while (order.count > 0 && it != sellBook.end() && it->first.price <= order.price) {
             // kind of a spin lock
             while (true) {
+                if (order.count == 0) break;
+                
                 uint32_t eid;
                 uint32_t expected = it->second.count.load();
                 if (expected == 0) break;
@@ -226,10 +228,12 @@ struct OrderBook {
         
         uint32_t len = buyBook.size();
         uint32_t idx = 0;
-
+        
         auto it = buyBook.begin();
         while (order.count > 0 && it != buyBook.end() && it->first.price >= order.price) {
             while (true) {
+                if (order.count == 0) break;
+                
                 uint32_t eid;
                 uint32_t expected = it->second.count.load();
                 if (expected == 0) break;
@@ -250,18 +254,18 @@ struct OrderBook {
             it = next(it);
             idx ++;
         }
-
+       
         if (order.count > 0) {
             addSellOrder(order, t + len);
         }
-
+        
         slb.leaveSell(t + len + 1, [this] {this->leavingFunc(true);});
     }
 
     // assumes client is the one that posted the order_id, the OrderBook does not check this
     // no choice, search everywhere
     void cancelOrder(const ClientCommand& order) {
-        int t = slb.enterCancel();
+        slb.enterCancel();
         bool flag = false;
         
         {
@@ -287,7 +291,7 @@ struct OrderBook {
             }
         }
 
-        Output::OrderDeleted(order.order_id, flag, t);
+        Output::OrderDeleted(order.order_id, flag, 0);
 
         slb.leaveCancel(); 
     }

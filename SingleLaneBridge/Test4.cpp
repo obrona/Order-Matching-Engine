@@ -7,8 +7,5 @@ SLB2 slb;
 
 int main() {
     slb.enterBuy();
-    slb.enterBuy();
-    
-    slb.leaveBuy();
     slb.leaveBuy();
 }   

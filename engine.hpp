@@ -7,17 +7,19 @@
 #include <chrono>
 #include <mutex>
 
-#include "OrderBook.hpp"
 #include "io.hpp"
+
+#include "OrderBook.hpp"
+#include "SafeHashmap.hpp"
 
 struct Engine
 {
 public:
-	std::mutex mut1;
-	std::unordered_map<uint32_t, std::thread::id> orderIdToTid;
+	SafeHashMap<uint32_t, std::thread::id> orderIdToTid;
+	SafeHashMap<uint32_t, std::string> orderIdToInstrument;
+	SafeHashMap<std::string, OrderBook> orderBooks;
+
 	
-	std::mutex mut2;
-	std::unordered_map<std::string, OrderBook> orderBooks;
 	
 	void accept(ClientConnection conn);
 
