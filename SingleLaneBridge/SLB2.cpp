@@ -4,9 +4,13 @@
 #include <memory>
 #include <condition_variable>
 #include <functional>
+#include <iostream>
 using namespace std;
 
-struct SingleLaneBridge {
+
+// this time, orders from the same side will sleep, until they all reached the other side, then all gets release
+
+struct SLB2 {
     int buyCnt = 0;
     int sellCnt = 0;
     int waveNum = 0;
@@ -14,10 +18,10 @@ struct SingleLaneBridge {
     shared_ptr<condition_variable> condPtr2; // orders from same side wait untill all reach other end, then leave
     shared_ptr<mutex> mutPtr; // have to use ptr because mutex is neither copyable nor movable
 
-    SingleLaneBridge(): condPtr(new condition_variable()), condPtr2(new condition_variable()), mutPtr(new mutex()) {}
+    SLB2(): condPtr(new condition_variable()), condPtr2(new condition_variable()), mutPtr(new mutex()) {}
 
     // copy and move constructor. So that we can use it in an unordered_map
-    SingleLaneBridge(const SingleLaneBridge& other): buyCnt(other.buyCnt), sellCnt(other.sellCnt), 
+    SLB2(const SLB2& other): buyCnt(other.buyCnt), sellCnt(other.sellCnt), 
         condPtr(other.condPtr), condPtr2(other.condPtr2), mutPtr(other.mutPtr) {}
 
     

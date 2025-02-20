@@ -5,12 +5,20 @@
 #define ENGINE_HPP
 
 #include <chrono>
+#include <mutex>
 
+#include "OrderBook.hpp"
 #include "io.hpp"
 
 struct Engine
 {
 public:
+	std::mutex mut1;
+	std::unordered_map<uint32_t, std::thread::id> orderIdToTid;
+	
+	std::mutex mut2;
+	std::unordered_map<std::string, OrderBook> orderBooks;
+	
 	void accept(ClientConnection conn);
 
 private:

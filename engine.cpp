@@ -1,11 +1,13 @@
 #include <iostream>
 #include <thread>
 #include <unordered_map>
+#include <string>
 
 #include "io.hpp"
 #include "engine.hpp"
 
-#include "OrderBook.hpp"
+
+
 
 
 void Engine::accept(ClientConnection connection)
@@ -28,39 +30,38 @@ void Engine::connection_thread(ClientConnection connection)
 
 		// Functions for printing output actions in the prescribed format are
 		// provided in the Output class:
-		switch(input.type)
-		{
-			case input_cancel: {
-				SyncCerr {} << "Got cancel: ID: " << input.order_id << std::endl;
+		if (input.type == 'C') {
+			bool flag;
+			unique_lock<mutex> ulock(mut1);
+			flag = orderIdToTid.contains(input.order_id) && orderIdToTid[input.order_id] == this_thread::get_id();
+			ulock.unlock();
 
-				// Remember to take timestamp at the appropriate time, or compute
-				// an appropriate timestamp!
-				auto output_time = getCurrentTimestamp();
-				Output::OrderDeleted(input.order_id, true, output_time);
-				break;
+			if (!flag) {
+				Output::OrderDeleted(input.order_id, false, 0);
+			} else {
+				unique_lock<mutex> ulock(mut2);
+				OrderBook& ob = orderBooks[string(input.instrument)];
+				ulock.unlock();
+
+				ob.cancelOrder(input);
 			}
+		} else {
+			unique_lock<mutex> ulock1(mut1);
+			orderIdToTid[input.order_id] = this_thread::get_id();
+			ulock1.unlock();
 
-			default: {
-				SyncCerr {}
-				    << "Got order: " << static_cast<char>(input.type) << " " << input.instrument << " x " << input.count << " @ "
-				    << input.price << " ID: " << input.order_id << std::endl;
+			unique_lock<mutex> ulock2(mut2);
+			OrderBook& ob = orderBooks[string(input.instrument)];
+			ulock2.unlock();
 
-				// Remember to take timestamp at the appropriate time, or compute
-				// an appropriate timestamp!
-				auto output_time = getCurrentTimestamp();
-				Output::OrderAdded(input.order_id, input.instrument, input.price, input.count, input.type == input_sell,
-				    output_time);
-				break;
+			if (input.type == 'B') {
+				cout << "buy received" << endl;
+				ob.matchBuy(input);
+			} else {
+				ob.matchSell(input);
 			}
 		}
 
-		// Additionally:
-
-		// Remember to take timestamp at the appropriate time, or compute
-		// an appropriate timestamp!
-		intmax_t output_time = getCurrentTimestamp();
-
-		// Check the parameter names in `io.hpp`.
-		Output::OrderExecuted(123, 124, 1, 2000, 10, output_time);
+		
 	}
 }

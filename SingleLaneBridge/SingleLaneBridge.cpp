@@ -11,6 +11,7 @@ struct SingleLaneBridge {
     int sellCnt = 0;
     int waveNum = 0;
     shared_ptr<condition_variable> condPtr; // same here, cond_var is neither copyable nor movable
+    shared_ptr<condition_variable> condPtr2;
     shared_ptr<mutex> mutPtr; // have to use ptr because mutex is neither copyable nor movable
 
     SingleLaneBridge(): mutPtr(new mutex()), condPtr(new condition_variable()) {}
@@ -46,10 +47,10 @@ struct SingleLaneBridge {
     void leaveBuy(int c, function<void()> f) {
         unique_lock<mutex> lock(*mutPtr);
         buyCnt --;
-        if (buyCnt == 0) {
+        if (buyCnt == 0) {  
             f();
             waveNum += c;
-            (*condPtr).notify_all();
+           (*condPtr).notify_all();
         }
     }
 

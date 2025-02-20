@@ -16,6 +16,9 @@ engine: $(SRCS:%=$(BUILDDIR)/%.o)
 client: $(BUILDDIR)/client.cpp.o
 	$(LINK.cc) $^ $(LOADLIBES) $(LDLIBS) -o $@
 
+debug_engine: 
+	clang++ -std=c++20 main.cpp engine.cpp io.cpp -g -o debug_engine
+
 .PHONY: clean
 clean:
 	rm -rf $(BUILDDIR)
