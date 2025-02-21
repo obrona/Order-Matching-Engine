@@ -20,7 +20,7 @@ debug_engine:
 	clang++ -std=c++20 main.cpp engine.cpp io.cpp -g -o debug_engine
 
 engine2:
-	clang++ -std=c++20 main.cpp engine.cpp io.cpp -o engine
+	clang++ -std=c++20 -latomic -fsanitize=thread -g main.cpp engine.cpp io.cpp -o engine
 
 .PHONY: clean
 clean:
