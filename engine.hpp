@@ -1,11 +1,12 @@
 // This file contains declarations for the main Engine class. You will
 // need to add declarations to this file as you develop your Engine.
-
+#pragma once
 #ifndef ENGINE_HPP
 #define ENGINE_HPP
 
 #include <chrono>
 #include <mutex>
+#include <thread>
 
 #include "io.hpp"
 

@@ -39,7 +39,7 @@ void Engine::connection_thread(ClientConnection connection)
 				&& orderIdToKey.contains(input.order_id);
 			
 			if (!flag) {
-				Output::OrderDeleted(input.order_id, false, timer.getTime());
+				Output::OrderDeleted(input.order_id, false, Timer::getTime());
 			} else {
 				std::string instr = orderIdToInstrument.getValue(input.order_id);
 				Key k = orderIdToKey.getValue(input.order_id);
