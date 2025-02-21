@@ -5,6 +5,8 @@
 
 #include "io.hpp"
 #include "engine.hpp"
+#include "Structs.hpp"
+#include "Timer.hpp"
 
 
 
@@ -31,26 +33,36 @@ void Engine::connection_thread(ClientConnection connection)
 		// Functions for printing output actions in the prescribed format are
 		// provided in the Output class:
 		if (input.type == 'C') {
-			bool flag = orderIdToTid.contains(input.order_id) && orderIdToTid.getValue(input.order_id) == this_thread::get_id();
+
+			// checl if order was created by this thread, and it has a key from being added to buy/sell book
+			bool flag = orderIdToTid.containsAndMatch(input.order_id, this_thread::get_id())
+				&& orderIdToKey.contains(input.order_id);
 			
 			if (!flag) {
-				Output::OrderDeleted(input.order_id, false, 0);
+				Output::OrderDeleted(input.order_id, false, timer.getTime());
 			} else {
 				std::string instr = orderIdToInstrument.getValue(input.order_id);
+				Key k = orderIdToKey.getValue(input.order_id);
 				OrderBook& ob = orderBooks.getValue(instr);
-				ob.cancelOrder(input);
+				ob.cancelOrder(input, k);
 			}
 		} else {
-			
 			orderIdToTid.insert(input.order_id, this_thread::get_id());
 			orderIdToInstrument.insert(input.order_id, std::string(input.instrument));
 			
 			OrderBook& ob = orderBooks.getValue(std::string(input.instrument));
+			Key k;
 			
+			if (input.price == 0) continue;
+
 			if (input.type == 'B') {
-				ob.matchBuy(input);
+				ob.matchBuy(input, k);
 			} else {
-				ob.matchSell(input);
+				ob.matchSell(input, k);
+			}
+
+			if (k.price != 0 && k.time != 0 && k.rid != 0) {
+				orderIdToKey.insert(input.order_id, k);
 			}
 		}
 

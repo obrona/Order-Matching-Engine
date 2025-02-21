@@ -10,24 +10,20 @@ struct SingleLaneBridge {
     int buyCnt = 0;
     int sellCnt = 0;
     int waveNum = 0;
-    shared_ptr<condition_variable> condPtr; // same here, cond_var is neither copyable nor movable
-    shared_ptr<condition_variable> condPtr2; // orders from same side wait untill all reach other end, then leave
-    shared_ptr<mutex> mutPtr; // have to use ptr because mutex is neither copyable nor movable
+    condition_variable condPtr; // same here, cond_var is neither copyable nor movable
+    mutex mutPtr; // have to use ptr because mutex is neither copyable nor movable
 
-    SingleLaneBridge(): condPtr(new condition_variable()), condPtr2(new condition_variable()), mutPtr(new mutex()) {}
+    SingleLaneBridge() {}
 
-    // copy and move constructor. So that we can use it in an unordered_map
-    SingleLaneBridge(const SingleLaneBridge& other): buyCnt(other.buyCnt), sellCnt(other.sellCnt), 
-        condPtr(other.condPtr), condPtr2(other.condPtr2), mutPtr(other.mutPtr) {}
-
+   
     
     // returns the wave number for the thread calling this
     int enterBuy() {
         int ticket;
         
         {
-            unique_lock<mutex> lock(*mutPtr);
-            while (sellCnt > 0) (*condPtr).wait(lock);
+            unique_lock<mutex> lock(mutPtr);
+            while (sellCnt > 0) (condPtr).wait(lock);
             ticket = waveNum;
             buyCnt++;
         }
@@ -36,34 +32,21 @@ struct SingleLaneBridge {
     }
 
     void leaveBuy() {
-        unique_lock<mutex> lock(*mutPtr);
-       
-        if (buyCnt == 1) {
+        unique_lock<mutex> lock(mutPtr);
+        buyCnt --;
+        if (buyCnt == 0) {
+            (condPtr).notify_all();
             waveNum++;
-            buyCnt --;
-            
-            
-            (*condPtr2).notify_all();
-            (*condPtr).notify_all();
-        } else {
-            buyCnt --;
-            while (buyCnt > 0) (*condPtr2).wait(lock);
         }
     }
 
-    void leaveBuy(int c, function<void()> f) {
-        unique_lock<mutex> lock(*mutPtr);
-        
-        if (buyCnt == 1) {  
+    void leaveBuy(function<void()> f) {
+        unique_lock<mutex> lock(mutPtr);
+        buyCnt --;
+        if (buyCnt == 0) {  
             f();
-            buyCnt --; // decrement must happen after running f because of spurious wakeup
-            waveNum += c;
-            
-            (*condPtr2).notify_all();
-            (*condPtr).notify_all();
-        } else {
-            buyCnt --;
-            while (buyCnt > 0) (*condPtr).wait(lock);
+            waveNum ++;
+           (condPtr).notify_all();
         }
     }
 
@@ -71,8 +54,8 @@ struct SingleLaneBridge {
         int ticket;
         
         {
-            unique_lock<mutex> lock(*mutPtr);
-            while (buyCnt > 0) (*condPtr).wait(lock);
+            unique_lock<mutex> lock(mutPtr);
+            while (buyCnt > 0) (condPtr).wait(lock);
             ticket = waveNum;
             sellCnt++;
         }
@@ -81,33 +64,21 @@ struct SingleLaneBridge {
     }
 
     void leaveSell() {
-        unique_lock<mutex> lock(*mutPtr);
-        
-        if (sellCnt == 1) {
+        unique_lock<mutex> lock(mutPtr);
+        sellCnt --;
+        if (sellCnt == 0) {
             waveNum++;
-            sellCnt --;
-           
-            (*condPtr2).notify_all();
-            (*condPtr).notify_all();
-        } else {
-            sellCnt --;
-            while (sellCnt > 0) (*condPtr2).wait(lock);
+            (condPtr).notify_all();
         }
     }
 
-    void leaveSell(int c, function<void()> f) {
-        unique_lock<mutex> lock(*mutPtr);
-        
-        if (sellCnt == 1) {
+    void leaveSell(function<void()> f) {
+        unique_lock<mutex> lock(mutPtr);
+        sellCnt --;
+        if (sellCnt == 0) {
             f();
-            sellCnt --;
-            waveNum += c;
-            
-            (*condPtr2).notify_all();
-            (*condPtr).notify_all();
-        } else {
-            sellCnt --;
-            while (sellCnt > 0) (*condPtr2).wait(lock);
+            waveNum ++;
+            (condPtr).notify_all();
         }
     }
 
@@ -117,8 +88,8 @@ struct SingleLaneBridge {
         int ticket;
         
         {
-            unique_lock lock(*mutPtr);
-            while (buyCnt > 0 || sellCnt > 0) (*condPtr).wait(lock);
+            unique_lock lock(mutPtr);
+            while (buyCnt > 0 || sellCnt > 0) (condPtr).wait(lock);
             ticket = waveNum;
             sellCnt++; buyCnt++;
         }
@@ -127,9 +98,9 @@ struct SingleLaneBridge {
     }
 
     void leaveCancel() {
-        unique_lock lock(*mutPtr);
+        unique_lock lock(mutPtr);
         sellCnt --; buyCnt --;
         waveNum++;
-        (*condPtr).notify_all();
+        (condPtr).notify_all();
     }
 };

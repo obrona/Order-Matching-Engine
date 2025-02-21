@@ -9,14 +9,17 @@
 
 #include "io.hpp"
 
+#include "Timer.hpp"
 #include "OrderBook.hpp"
 #include "SafeHashmap.hpp"
+#include "Structs.hpp"
 
 struct Engine
 {
 public:
 	SafeHashMap<uint32_t, std::thread::id> orderIdToTid;
 	SafeHashMap<uint32_t, std::string> orderIdToInstrument;
+	SafeHashMap<uint32_t, Key> orderIdToKey;
 	SafeHashMap<std::string, OrderBook> orderBooks;
 
 	

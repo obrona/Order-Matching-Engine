@@ -9,20 +9,25 @@ struct SafeHashMap {
 	std::unordered_map<Key, T> hashmap;
 
 	bool contains(const Key& k) {
-		std::unique_lock<std::mutex> lock(mut);
+		std::lock_guard<std::mutex> lock(mut);
 		return hashmap.contains(k);
-	
+	}
+
+	// check if key k exists and check if hashmap[k] == val
+	bool containsAndMatch(const Key& k, T val) {
+		std::lock_guard<std::mutex> lock(mut);
+		return hashmap.contains(k) && hashmap[k] == val;
 	}
 
 	// if key does not exists, insert a default constructed T
 	// and returns that
 	T& getValue(const Key& key) {
-		std::unique_lock<std::mutex> lock(mut);
+		std::lock_guard<std::mutex> lock(mut);
 		return hashmap[key];
 	}
 
 	void insert(const Key& key, T value) {
-		std::unique_lock<std::mutex> lock(mut);
+		std::lock_guard<std::mutex> lock(mut);
 		hashmap[key] = value;
 	}
 };
