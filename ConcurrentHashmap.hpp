@@ -46,24 +46,17 @@ struct ConcurrentHashMap {
     // this only works if no deletion for the hashmap
     // anyway we do not have any method to delete elems in hashmap
     bool contains(const Key key) {
-        bool flag = false;
-        
         enterRead();
-        flag = hashmap.contains(key);
+        bool flag = hashmap.contains(key);
         leaveRead();
-
         return flag;
-        
     }
 
     // up to user to make sure key is inside, use contains
-    T at(const Key& key) {
-        T value;
-        
+    T& at(const Key& key) {
         enterRead();
-        value = hashmap.at(key);
+        T& value = hashmap.at(key);
         leaveRead();
-
         return value;
     }
 };

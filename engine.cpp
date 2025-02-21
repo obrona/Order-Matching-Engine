@@ -50,7 +50,9 @@ void Engine::connection_thread(ClientConnection connection)
 			orderIdToTid.insert(input.order_id, this_thread::get_id());
 			orderIdToInstrument.insert(input.order_id, std::string(input.instrument));
 			
-			OrderBook& ob = orderBooks.getValue(std::string(input.instrument));
+			// may be a new order book, as this order is the 1st for order's instrument
+			// so it can be a write to the hashmap
+			OrderBook& ob = orderBooks.writeAndGetValue(std::string(input.instrument));
 			Key k;
 			
 			if (input.price == 0) continue;

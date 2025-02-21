@@ -4,8 +4,9 @@ client
 /.deps
 compile_commands.json
 .cache
-test*
+test*.cpp
 .vscode/
 a.out
 ConcurrentTree/
 debug_engine
+8888
