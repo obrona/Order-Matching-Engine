@@ -47,7 +47,7 @@ struct OrderBook {
         // since it is a lock, order from timestamp = order of which buy order is added to book
         lock_guard<mutex> lock(mut);
         
-        uint32_t time = Timer::getTime();
+        uint64_t time = Timer::getTime();
         buyBook.insert({{order.price, time, order.order_id, false}, AtomicNode{order.count, 1}});
         storeKey = {order.price, time, order.order_id, false};
         
@@ -57,7 +57,7 @@ struct OrderBook {
     void addSell(const ClientCommand& order, Key& storeKey) {
         lock_guard<mutex> lock(mut);
         
-        uint32_t time = Timer::getTime();
+        uint64_t time = Timer::getTime();
         sellBook.insert({{order.price, time, order.order_id, true}, AtomicNode{order.count, 1}});
         storeKey = {order.price, time, order.order_id, true};
 
@@ -81,7 +81,7 @@ struct OrderBook {
                 if (expected.count == 0) break;
 
                 uint32_t c = min(order.count, expected.count);
-                uint32_t time = Timer::getTime();
+                uint64_t time = Timer::getTime();
 
                 if (it->second.store.compare_exchange_strong(expected, {expected.count - c, expected.eid + 1})) {
                     // successful match, new value updated. 
@@ -110,7 +110,7 @@ struct OrderBook {
                 if (expected.count == 0) break;
                 
                 uint32_t c = min(order.count, expected.count);
-                uint32_t time = Timer::getTime();
+                uint64_t time = Timer::getTime();
 
                 if (it->second.store.compare_exchange_strong(expected, {expected.count - c, expected.eid + 1})) {
                     order.count -= c;

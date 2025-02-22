@@ -5,7 +5,9 @@ using namespace std;
 
 // all these are the immutable info about a resting order
 struct Key {
-    uint32_t price = 0, time = 0, rid = 0;  // if rid == -1, means key not inserted
+    uint32_t price = 0;
+    uint64_t time = 0;
+    uint32_t rid = 0;  // if rid == -1, means key not inserted
     bool side = false;                         // false if it is buy, true if is sell
 };
 

@@ -41,7 +41,7 @@ def create_testcase(num_threads, num_orders_per_thread):
         file.write('o\n\n')
 
         for i in range(num_threads):
-            client_write2(file, i, (i + 1) * 2 * num_orders_per_thread, num_orders_per_thread)
+            client_write(file, i, (i + 1) * 2 * num_orders_per_thread, num_orders_per_thread)
             file.write('\n')
 
         file.write('x\n')
