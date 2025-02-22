@@ -1,4 +1,5 @@
 import random
+import sys
 
 instruments = ['AAPL', 'GOOG', 'NVDA']
 i_len = len(instruments)
@@ -34,15 +35,15 @@ def client_write2(file_handle, id, start, count):
     file_handle.write(f'{id} C {start}\n')
 
 
-def create_testcase(num_threads):
+def create_testcase(num_threads, num_orders_per_thread):
     with open('tests/test.in', 'w') as file:
         file.write(f'{num_threads}\n')
         file.write('o\n\n')
 
         for i in range(num_threads):
-            client_write2(file, i, (i + 1) * 100, 50)
+            client_write2(file, i, (i + 1) * 2 * num_orders_per_thread, num_orders_per_thread)
             file.write('\n')
 
         file.write('x\n')
     
-create_testcase(40)
+create_testcase(int(sys.argv[1]), int(sys.argv[2]))
