@@ -2,10 +2,9 @@
 #include <iostream>
 #include <thread>
 using namespace std;
-#include "SingleLaneBridge.cpp"
+#include "../SingleLaneBridge.hpp"
 
-// test whether SingleLaneBridge can be used in a hashmap. For T to be a value in a hashmap
-// it must be copy (and move?) contructible
+// test whether SingleLaneBridge can be used in a hashmap.
 
 unordered_map<int, SingleLaneBridge> hashmap;
 

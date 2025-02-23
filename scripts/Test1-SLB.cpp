@@ -2,7 +2,7 @@
 #include <iostream>
 using namespace std;
 
-#include "SingleLaneBridge.cpp"
+#include "../SingleLaneBridge.hpp"
 
 // test the basic functionality of SingleLaneBridge
 
@@ -14,9 +14,9 @@ void wantBuy(int id) {
         
         printf("T%d enter buy. WaveNum: %d\n", id, t);
         this_thread::sleep_for(chrono::milliseconds(1));
-        printf("T%d leave buy. WaveNum: %d\n", id, t);
+        //printf("T%d leave buy. WaveNum: %d\n", id, t);
         
-        slb.leaveBuy();
+        slb.leaveBuy([t] {printf("Wave %d done\n", t);});
     }
    
 }
@@ -27,9 +27,9 @@ void wantSell(int id) {
 
         printf("T%d enter sell. WaveNum: %d\n", id, t);
         this_thread::sleep_for(chrono::milliseconds(1));
-        printf("T%d leave sell. WaveNum: %d\n", id, t);
+        //printf("T%d leave sell. WaveNum: %d\n", id, t);
 
-        slb.leaveSell();
+        slb.leaveSell([t] {printf("Wave %d done\n", t);});
     }
 }
 

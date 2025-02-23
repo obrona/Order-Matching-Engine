@@ -2,7 +2,7 @@ CC = gcc
 CXX = g++
 
 CFLAGS := $(CFLAGS) -g -O3 -Wall -Wextra -pedantic -Werror -std=c18 -pthread
-CXXFLAGS := $(CXXFLAGS) -g -O3 -Wall -Wextra -pedantic -Werror -std=c++20 -pthread
+CXXFLAGS := $(CXXFLAGS) -g -O3 -Wall -Wextra -pedantic -Werror -std=c++20 -pthread -latomic
 
 BUILDDIR = build
 
@@ -21,6 +21,9 @@ debug_engine:
 
 engine2:
 	clang++ -std=c++20 -latomic  -fsanitize=thread -O2 -g main.cpp engine.cpp io.cpp -o engine
+
+engine3:
+	clang++ -std=c++20 -latomic  -fsanitize=address -O2 -g main.cpp engine.cpp io.cpp -o engine
 
 .PHONY: clean
 clean:
