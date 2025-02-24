@@ -124,6 +124,38 @@ struct OrderBook {
         slb.leaveSell([this] { this->removeFinishedBuys(); });
     }
     
+    void cancelBuyOrder(const ClientCommand& order, const Key& k) {
+        slb.enterBuy();
+        
+        {
+            lock_guard<mutex> lock(mut);
+        
+            auto it = buyBook.find(k);
+            bool found = it != buyBook.end();
+            if (found) buyBook.erase(it);
+            
+            Output::OrderDeleted(order.order_id, found, Timer::getTime());
+        }
+        
+        slb.leaveBuy();
+        
+    }
+
+    void cancelSellOrder(const ClientCommand& order, const Key& k) {
+        slb.enterSell();
+
+        {
+            lock_guard<mutex> lock(mut);
+
+            auto it = sellBook.find(k);
+            bool found = it != sellBook.end();
+            if (found) sellBook.erase(it);
+
+            Output::OrderDeleted(order.order_id, found, Timer::getTime());
+        }
+
+        slb.leaveSell();
+    }
 
     void cancelOrder(const ClientCommand& order, const Key& k) {
         slb.enterCancel();

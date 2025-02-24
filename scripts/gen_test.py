@@ -24,6 +24,7 @@ def client_write(file_handle, id, start, count):
 
 '''
 this time action (buy or sell), instrument, price and count are all randomly chosen
+then try to cancel the 1st half of buy/sell orders
 '''
 def client_write2(file_handle, id, start, count):
     for i in range(count):
@@ -32,7 +33,8 @@ def client_write2(file_handle, id, start, count):
                           f'{random.randint(1, 100)}\n')
         
     
-    file_handle.write(f'{id} C {start}\n')
+    for i in range(count // 2):
+        file_handle.write(f'{id} C {start + count // 2 + i}\n')
 
 
 def create_testcase(num_threads, num_orders_per_thread):
@@ -41,7 +43,7 @@ def create_testcase(num_threads, num_orders_per_thread):
         file.write('o\n\n')
 
         for i in range(num_threads):
-            client_write(file, i, (i + 1) * 2 * num_orders_per_thread, num_orders_per_thread)
+            client_write2(file, i, (i + 1) * 2 * num_orders_per_thread, num_orders_per_thread)
             file.write('\n')
 
         file.write('x\n')
