@@ -45,8 +45,8 @@ void Engine::connection_thread(ClientConnection connection)
 				Key k = orderIdToKey.getValue(input.order_id);
 				OrderBook& ob = orderBooks.getValue(instr);
 				
-				ob.cancelOrder(input, k);
-				//(k.side) ? ob.cancelSellOrder(input, k) : ob.cancelBuyOrder(input, k);
+				// ob.cancelOrder(input, k);
+				(k.side) ? ob.cancelSellOrder(input, k) : ob.cancelBuyOrder(input, k);
 			}
 		} else {
 			orderIdToTid.insert(input.order_id, this_thread::get_id());

@@ -24,7 +24,7 @@ def client_write(file_handle, id, start, count):
 
 '''
 this time action (buy or sell), instrument, price and count are all randomly chosen
-then try to cancel the 1st half of buy/sell orders
+then cancel the 2nd half of buy/sell orders
 '''
 def client_write2(file_handle, id, start, count):
     for i in range(count):

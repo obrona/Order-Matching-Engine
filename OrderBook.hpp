@@ -131,7 +131,10 @@ struct OrderBook {
             lock_guard<mutex> lock(mut);
         
             auto it = buyBook.find(k);
-            bool found = it != buyBook.end();
+
+            // must check if order still exist exists if count > 0, if count == 0, order does not exist
+            // we have a mutex, so only 1 thread is inside buyBook at any time
+            bool found = it != buyBook.end() && it->second.store.load().count > 0; 
             if (found) buyBook.erase(it);
             
             Output::OrderDeleted(order.order_id, found, Timer::getTime());
@@ -148,7 +151,7 @@ struct OrderBook {
             lock_guard<mutex> lock(mut);
 
             auto it = sellBook.find(k);
-            bool found = it != sellBook.end();
+            bool found = it != sellBook.end() && it->second.store.load().count > 0;
             if (found) sellBook.erase(it);
 
             Output::OrderDeleted(order.order_id, found, Timer::getTime());
@@ -156,33 +159,6 @@ struct OrderBook {
 
         slb.leaveSell();
     }
-
-    void cancelOrder(const ClientCommand& order, const Key& k) {
-        slb.enterCancel();
-
-        bool found = false;
-        
-        if (!k.side) {
-            auto it = buyBook.find(k);
-            if (it != buyBook.end()) {
-                found = true;
-                buyBook.erase(it);
-            }
-        } else {
-            auto it = sellBook.find(k);
-            if (it != sellBook.end()) {
-                found = true;
-                sellBook.erase(it);
-            }
-        }
-
-        Output::OrderDeleted(order.order_id, found, Timer::getTime());
-
-        slb.leaveCancel();
-    }
-
-
-
 };
 
 
