@@ -34,7 +34,7 @@ struct SingleLaneBridge {
         unique_lock<mutex> lock(mutPtr);
         buyCnt --;
         if (buyCnt == 0) {
-            (condPtr).notify_all();
+            condPtr.notify_all();
             waveNum++;
         }
     }
@@ -45,7 +45,7 @@ struct SingleLaneBridge {
         if (buyCnt == 0) {  
             f();
             waveNum ++;
-           (condPtr).notify_all();
+           condPtr.notify_all();
         }
     }
 
@@ -67,7 +67,7 @@ struct SingleLaneBridge {
         sellCnt --;
         if (sellCnt == 0) {
             waveNum++;
-            (condPtr).notify_all();
+            condPtr.notify_all();
         }
     }
 
@@ -77,7 +77,7 @@ struct SingleLaneBridge {
         if (sellCnt == 0) {
             f();
             waveNum ++;
-            (condPtr).notify_all();
+            condPtr.notify_all();
         }
     }
 
@@ -100,6 +100,6 @@ struct SingleLaneBridge {
         unique_lock lock(mutPtr);
         sellCnt --; buyCnt --;
         waveNum++;
-        (condPtr).notify_all();
+        condPtr.notify_all();
     }
 };

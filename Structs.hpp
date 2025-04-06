@@ -7,8 +7,8 @@ using namespace std;
 struct Key {
     uint32_t price = 0;
     uint64_t time = 0;
-    uint32_t rid = 0;  // if rid == -1, means key not inserted
-    bool side = false;                         // false if it is buy, true if is sell
+    uint32_t rid = 0;    // if rid == -1, means key not inserted
+    bool side = false;   // false if it is buy, true if is sell
 };
 
 struct CompareLessKey {
