@@ -37,6 +37,7 @@ void Engine::connection_thread(ClientConnection connection)
 			// checl if order was created by this thread, and it has a key from being added to buy/sell book
 			bool flag = orderIdToTid.containsAndMatch(input.order_id, this_thread::get_id())
 				&& orderIdToKey.contains(input.order_id);
+			cerr << orderIdToTid.containsAndMatch(input.order_id, this_thread::get_id()) << endl;
 			
 			if (!flag) {
 				Output::OrderDeleted(input.order_id, false, Timer::getTime());
@@ -65,7 +66,7 @@ void Engine::connection_thread(ClientConnection connection)
 				ob.matchSell(input, k);
 			}
 
-			if (k.price != 0 && k.time != 0 && k.rid != 0) {
+			if (k.gotInsert) {
 				orderIdToKey.insert(input.order_id, k);
 			}
 		}

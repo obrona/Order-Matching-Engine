@@ -9,6 +9,7 @@ struct Key {
     uint64_t time = 0;
     uint32_t rid = 0;    // if rid == -1, means key not inserted
     bool side = false;   // false if it is buy, true if is sell
+    bool gotInsert = false;
 };
 
 struct CompareLessKey {

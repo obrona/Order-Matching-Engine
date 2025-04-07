@@ -48,8 +48,8 @@ struct OrderBook {
         lock_guard<mutex> lock(mut);
         
         uint64_t time = Timer::getTime();
-        buyBook.insert({{order.price, time, order.order_id, false}, AtomicNode{order.count, 1}});
-        storeKey = {order.price, time, order.order_id, false};
+        buyBook.insert({{order.price, time, order.order_id, false, true}, AtomicNode{order.count, 1}});
+        storeKey = {order.price, time, order.order_id, false, true};
         
         Output::OrderAdded(order.order_id, order.instrument, order.price, order.count, false, time);
     }
@@ -58,8 +58,8 @@ struct OrderBook {
         lock_guard<mutex> lock(mut);
         
         uint64_t time = Timer::getTime();
-        sellBook.insert({{order.price, time, order.order_id, true}, AtomicNode{order.count, 1}});
-        storeKey = {order.price, time, order.order_id, true};
+        sellBook.insert({{order.price, time, order.order_id, true, true}, AtomicNode{order.count, 1}});
+        storeKey = {order.price, time, order.order_id, true, true};
 
         Output::OrderAdded(order.order_id, order.instrument, order.price, order.count, true, time);
     }
